@@ -1,10 +1,7 @@
 flask
 flask-cors
 openai-whisper
-transformers
-torch
 pydub
-requests
 google-generativeai
 python-dotenv
 

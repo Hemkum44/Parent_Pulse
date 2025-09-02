@@ -3,9 +3,7 @@ from flask_cors import CORS
 import whisper
 from pydub import AudioSegment
 import os
-import uuid
 import google.generativeai as genai
-from transformers import pipeline
 import tempfile
 from dotenv import load_dotenv
 
@@ -26,7 +24,6 @@ else:
 
 # Load models once at startup
 whisper_model = whisper.load_model("base")
-sentiment_pipeline = pipeline("sentiment-analysis")
 
 def transcribe_audio_file(file_path):
     """Transcribe audio file using Whisper"""
@@ -37,12 +34,25 @@ def transcribe_audio_file(file_path):
         raise Exception(f"Transcription failed: {str(e)}")
 
 def analyze_emotion(text):
-    """Analyze emotion using transformers pipeline"""
+    """Simple emotion analysis based on keywords"""
     try:
-        result = sentiment_pipeline(text)[0]
-        return result['label'], result['score']
+        text_lower = text.lower()
+        
+        # Simple keyword-based emotion detection
+        negative_words = ['angry', 'frustrated', 'upset', 'mad', 'annoyed', 'stressed', 'worried', 'anxious', 'sad', 'tired', 'exhausted']
+        positive_words = ['happy', 'excited', 'proud', 'grateful', 'calm', 'peaceful', 'content', 'pleased']
+        
+        negative_count = sum(1 for word in negative_words if word in text_lower)
+        positive_count = sum(1 for word in positive_words if word in text_lower)
+        
+        if negative_count > positive_count:
+            return 'NEGATIVE', min(0.6 + (negative_count * 0.1), 0.95)
+        elif positive_count > negative_count:
+            return 'POSITIVE', min(0.6 + (positive_count * 0.1), 0.95)
+        else:
+            return 'NEUTRAL', 0.5
     except Exception as e:
-        raise Exception(f"Emotion analysis failed: {str(e)}")
+        return 'NEUTRAL', 0.5
 
 def generate_response(user_text, child_profile, tone, conversation_history=None):
     """Generate parenting advice using Gemini API with fallback"""
@@ -102,7 +112,7 @@ Give a short, emotionally validating response followed by one actionable phrase 
             if conversation_history:
                 fallback_response = f"I understand your follow-up concern. Based on your {label.lower()} feelings, remember that parenting approaches often need adjustment. Try a different angle or give the previous suggestion more time to work."
             else:
-                fallback_response = f"I can sense that you're feeling {label.lower()} right now (confidence: {score:.2f}). Parenting can be challenging, and it's completely normal to feel this way. Take a deep breath and remember that you're doing your best. Try saying to your child: 'I understand this is hard for both of us. Let's figure this out together.'"
+                fallback_response = f"I can sense that you're feeling {label.lower()} right now. Parenting can be challenging, and it's completely normal to feel this way. Take a deep breath and remember that you're doing your best. Try saying to your child: 'I understand this is hard for both of us. Let's figure this out together.'"
             return fallback_response
         except:
             return "I understand your concern. Every parenting situation is unique, and it's normal to need clarification or alternative approaches. Trust your instincts and remember that consistency and patience are key."

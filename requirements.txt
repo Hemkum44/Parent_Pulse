@@ -1,0 +1,13 @@
+flask
+flask-cors
+openai-whisper
+transformers
+torch
+pydub
+requests
+google-generativeai
+python-dotenv
+
+# LLM via Google Gemini API
+# Get API key from: https://aistudio.google.com/app/apikey
+# API key is now stored in .env file

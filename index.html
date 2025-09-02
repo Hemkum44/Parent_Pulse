@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParentPulse - Real-Time Parenting Support</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .modern-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .recording-pulse {
+            animation: pulse 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .input-focus {
+            transition: all 0.2s ease;
+        }
+        
+        .input-focus:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-blue-50 min-h-screen">
+    <!-- Header -->
+    <div class="gradient-bg text-white py-12 sm:py-16 relative">
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="mb-4">
+                <i class="fas fa-heart text-4xl sm:text-6xl mb-4 opacity-90"></i>
+            </div>
+            <h1 class="text-3xl sm:text-5xl font-bold mb-4 tracking-tight">ParentPulse</h1>
+            <p class="text-lg sm:text-xl opacity-90 max-w-2xl mx-auto leading-relaxed px-4">Your AI-powered parenting companion for real-time support and guidance</p>
+            <div class="mt-6 flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4 text-sm opacity-80">
+                <span class="flex items-center justify-center"><i class="fas fa-microphone mr-2"></i>Voice Recognition</span>
+                <span class="flex items-center justify-center"><i class="fas fa-brain mr-2"></i>AI Analysis</span>
+                <span class="flex items-center justify-center"><i class="fas fa-comments mr-2"></i>Expert Advice</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 sm:py-12 max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            <!-- Child Profile Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="glass-card rounded-2xl modern-shadow p-6 sm:p-8 lg:sticky lg:top-8 hover-lift">
+                    <h2 class="text-xl sm:text-2xl font-bold gradient-text mb-4 sm:mb-6 flex items-center">
+                        <i class="fas fa-child mr-2 sm:mr-3 text-2xl sm:text-3xl"></i> Child Profile
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-3">
+                                Child's Age: <span id="age-display" class="font-bold text-purple-600 text-base sm:text-lg">5</span> years old
+                            </label>
+                            <input type="range" id="child-age" min="1" max="18" value="5" 
+                                   class="w-full h-4 sm:h-3 bg-gradient-to-r from-purple-200 to-blue-200 rounded-lg appearance-none cursor-pointer slider hover:from-purple-300 hover:to-blue-300 transition-all duration-200">
+                        </div>
+                        
+                        <div>
+                            <label for="child-traits" class="block text-sm font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-star mr-2 text-yellow-500"></i>Describe your child
+                            </label>
+                            <textarea id="child-traits" rows="3" 
+                                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus transition-all duration-200 text-base"
+                                      placeholder="e.g., Sensitive, high energy, loves art">Sensitive, high energy</textarea>
+                        </div>
+                        
+                        <div>
+                            <label for="tone-pref" class="block text-sm font-semibold text-gray-700 mb-3">
+                                <i class="fas fa-volume-up mr-2 text-green-500"></i>Preferred tone
+                            </label>
+                            <select id="tone-pref" 
+                                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent input-focus transition-all duration-200 bg-white text-base">
+                                <option value="gentle">Gentle</option>
+                                <option value="direct">Direct</option>
+                                <option value="playful">Playful</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2">
+                <div class="glass-card rounded-2xl modern-shadow p-6 sm:p-8 hover-lift">
+                    <h2 class="text-2xl sm:text-3xl font-bold gradient-text mb-6 sm:mb-8 flex items-center">
+                        <i class="fas fa-microphone-alt mr-2 sm:mr-3 text-3xl sm:text-4xl"></i> Share Your Situation
+                    </h2>
+                    
+                    <!-- Input Mode Selection -->
+                    <div class="mb-6 sm:mb-8">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                            <label class="flex items-center justify-center cursor-pointer bg-gradient-to-r from-blue-50 to-indigo-50 p-4 sm:p-4 rounded-xl border-2 border-transparent hover:border-blue-300 transition-all duration-200 hover-lift touch-manipulation">
+                                <input type="radio" name="input-mode" value="text" checked 
+                                       class="mr-2 sm:mr-3 text-blue-600 focus:ring-blue-500 scale-125">
+                                <i class="fas fa-keyboard text-blue-500 mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                                <span class="text-base sm:text-lg font-semibold text-gray-700">Type Text</span>
+                            </label>
+                            <label class="flex items-center justify-center cursor-pointer bg-gradient-to-r from-red-50 to-pink-50 p-4 sm:p-4 rounded-xl border-2 border-transparent hover:border-red-300 transition-all duration-200 hover-lift touch-manipulation">
+                                <input type="radio" name="input-mode" value="voice" 
+                                       class="mr-2 sm:mr-3 text-red-600 focus:ring-red-500 scale-125">
+                                <i class="fas fa-microphone text-red-500 mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                                <span class="text-base sm:text-lg font-semibold text-gray-700">Record Voice</span>
+                            </label>
+                            <label class="flex items-center justify-center cursor-pointer bg-gradient-to-r from-green-50 to-emerald-50 p-4 sm:p-4 rounded-xl border-2 border-transparent hover:border-green-300 transition-all duration-200 hover-lift touch-manipulation">
+                                <input type="radio" name="input-mode" value="audio" 
+                                       class="mr-2 sm:mr-3 text-green-600 focus:ring-green-500 scale-125">
+                                <i class="fas fa-upload text-green-500 mr-1 sm:mr-2 text-sm sm:text-base"></i>
+                                <span class="text-base sm:text-lg font-semibold text-gray-700">Upload Audio</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Text Input -->
+                    <div id="text-input-section" class="mb-6 sm:mb-8">
+                        <label for="user-text" class="block text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center">
+                            <i class="fas fa-edit mr-2 text-blue-500"></i>Describe what's happening right now
+                        </label>
+                        <textarea id="user-text" rows="4" 
+                                  class="w-full px-4 sm:px-6 py-3 sm:py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus transition-all duration-200 text-base sm:text-lg resize-none"
+                                  placeholder="Tell us about your parenting situation... Be as detailed as you'd like."></textarea>
+                    </div>
+
+                    <!-- Voice Recording -->
+                    <div id="voice-input-section" class="mb-6 sm:mb-8 hidden">
+                        <label class="block text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center">
+                            <i class="fas fa-microphone mr-2 text-red-500"></i>Record your voice
+                        </label>
+                        <div class="border-2 border-dashed border-red-200 rounded-2xl p-6 sm:p-8 text-center bg-gradient-to-br from-red-50 to-pink-50">
+                            <div id="voice-controls">
+                                <button id="record-btn" class="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white font-bold py-4 px-6 sm:px-8 rounded-full transition-all duration-200 flex items-center mx-auto shadow-lg hover:shadow-xl transform hover:scale-105 touch-manipulation min-h-[48px]">
+                                    <i class="fas fa-microphone text-lg sm:text-xl mr-2 sm:mr-3"></i>
+                                    <span id="record-text" class="text-base sm:text-lg">Start Recording</span>
+                                </button>
+                                <div id="recording-status" class="mt-4 hidden">
+                                    <div class="flex items-center justify-center bg-white rounded-full px-4 py-2 shadow-md mx-auto max-w-xs">
+                                        <div class="recording-pulse w-3 sm:w-4 h-3 sm:h-4 bg-red-500 rounded-full mr-2 sm:mr-3"></div>
+                                        <span class="text-red-600 font-semibold text-sm sm:text-lg">Recording... <span id="recording-time" class="font-mono">0:00</span></span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 mt-4 text-sm px-4">Speak clearly about your parenting situation</p>
+                            </div>
+                        </div>
+                        <div id="voice-status" class="mt-3 hidden"></div>
+                    </div>
+
+                    <!-- Audio Upload -->
+                    <div id="audio-input-section" class="mb-6 sm:mb-8 hidden">
+                        <label for="audio-file" class="block text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center">
+                            <i class="fas fa-file-audio mr-2 text-green-500"></i>Upload an audio file
+                        </label>
+                        <div class="border-2 border-dashed border-green-200 rounded-2xl p-6 sm:p-8 text-center bg-gradient-to-br from-green-50 to-emerald-50 hover:border-green-300 transition-all duration-200 touch-manipulation">
+                            <input type="file" id="audio-file" accept=".mp3,.wav,.m4a" class="hidden">
+                            <label for="audio-file" class="cursor-pointer">
+                                <div class="text-gray-600">
+                                    <i class="fas fa-cloud-upload-alt text-4xl sm:text-6xl text-green-400 mb-3 sm:mb-4"></i>
+                                    <p class="text-lg sm:text-xl font-semibold mb-2">Click to upload audio file</p>
+                                    <p class="text-sm text-gray-500 px-4">MP3, WAV, M4A up to 10MB</p>
+                                    <div class="mt-3 sm:mt-4 flex justify-center space-x-3 sm:space-x-4 text-xs text-gray-400">
+                                        <span><i class="fas fa-file-audio mr-1"></i>MP3</span>
+                                        <span><i class="fas fa-file-audio mr-1"></i>WAV</span>
+                                        <span><i class="fas fa-file-audio mr-1"></i>M4A</span>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="audio-status" class="mt-3 hidden"></div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button id="submit-btn" 
+                            class="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-4 px-6 sm:px-8 rounded-2xl transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 text-base sm:text-lg touch-manipulation min-h-[48px]">
+                        <i class="fas fa-magic mr-2 sm:mr-3"></i>
+                        <span id="submit-text">Get Parenting Support</span>
+                        <div id="submit-spinner" class="loading-spinner ml-2 sm:ml-3 hidden"></div>
+                    </button>
+
+                    <!-- Results Section -->
+                    <div id="results" class="mt-8 hidden">
+                        <!-- Transcription Result -->
+                        <div id="transcription-result" class="mb-6 sm:mb-8 hidden">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center">
+                                <i class="fas fa-quote-left mr-2 sm:mr-3 text-blue-500"></i>You said:
+                            </h3>
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-400 p-4 sm:p-6 rounded-xl shadow-md">
+                                <p id="transcription-text" class="text-gray-700 text-base sm:text-lg leading-relaxed font-medium"></p>
+                            </div>
+                        </div>
+
+                        <!-- Emotion Analysis -->
+                        <div id="emotion-result" class="mb-6 sm:mb-8 hidden">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center">
+                                <i class="fas fa-heart mr-2 sm:mr-3 text-pink-500"></i>Emotion Analysis
+                            </h3>
+                            <div class="bg-gradient-to-r from-green-50 to-teal-50 border-l-4 border-green-400 p-4 sm:p-6 rounded-xl shadow-md">
+                                <p class="text-base sm:text-lg"><strong>Detected Emotion:</strong> 
+                                    <span id="emotion-label" class="font-semibold bg-white px-3 sm:px-4 py-1 sm:py-2 rounded-full shadow-sm border text-sm sm:text-base"></span> 
+                                    <span class="text-gray-600 text-sm sm:text-base">(<span id="emotion-score"></span> confidence)</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Parenting Advice -->
+                        <div id="advice-result" class="mb-6 sm:mb-8 hidden">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 flex items-center">
+                                <i class="fas fa-lightbulb mr-2 sm:mr-3 text-yellow-500"></i>AI Parenting Guidance
+                            </h3>
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 border-l-4 border-purple-400 p-4 sm:p-6 rounded-xl shadow-md">
+                                <p id="advice-text" class="text-gray-700 leading-relaxed text-base sm:text-lg font-medium"></p>
+                            </div>
+                        </div>
+
+                        <!-- Follow-up Questions Section -->
+                        <div id="followup-section" class="mb-6 sm:mb-8 hidden">
+                            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6 flex items-center">
+                                <i class="fas fa-comments mr-2 sm:mr-3 text-blue-500"></i>Continue the Conversation
+                            </h3>
+                            
+                            <!-- Conversation History -->
+                            <div id="conversation-history" class="mb-4 sm:mb-6 space-y-3 sm:space-y-4 max-h-80 sm:max-h-96 overflow-y-auto">
+                                <!-- Conversation messages will be added here -->
+                            </div>
+                            
+                            <!-- Follow-up Input -->
+                            <div class="bg-gradient-to-r from-gray-50 to-blue-50 p-4 sm:p-6 rounded-2xl border border-gray-200">
+                                <label for="followup-text" class="block text-base sm:text-lg font-semibold text-gray-700 mb-3 sm:mb-4 flex items-center">
+                                    <i class="fas fa-question-circle mr-2 text-blue-500"></i>Ask a follow-up question:
+                                </label>
+                                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
+                                    <textarea id="followup-text" rows="2" 
+                                              class="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent input-focus transition-all duration-200 text-base sm:text-lg resize-none"
+                                              placeholder="e.g., What if my child doesn't respond well to that approach?"></textarea>
+                                    <button id="followup-btn" 
+                                            class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold rounded-xl transition-all duration-200 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:scale-105 touch-manipulation min-h-[48px] w-full sm:w-auto">
+                                        <span id="followup-btn-text">Ask</span>
+                                        <div id="followup-spinner" class="loading-spinner ml-2 hidden"></div>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Follow-up Suggestions -->
+                            <div id="quick-followups" class="mt-4">
+                                <p class="text-sm font-semibold text-gray-600 mb-3">Quick questions:</p>
+                                <div class="flex flex-wrap gap-2 sm:gap-3">
+                                    <button class="quick-followup-btn px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 text-blue-700 rounded-full transition-all duration-200 font-medium shadow-sm hover:shadow-md transform hover:scale-105 touch-manipulation">
+                                        What if this doesn't work?
+                                    </button>
+                                    <button class="quick-followup-btn px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 text-blue-700 rounded-full transition-all duration-200 font-medium shadow-sm hover:shadow-md transform hover:scale-105 touch-manipulation">
+                                        How do I stay calm?
+                                    </button>
+                                    <button class="quick-followup-btn px-3 sm:px-4 py-2 text-xs sm:text-sm bg-gradient-to-r from-blue-100 to-indigo-100 hover:from-blue-200 hover:to-indigo-200 text-blue-700 rounded-full transition-all duration-200 font-medium shadow-sm hover:shadow-md transform hover:scale-105 touch-manipulation">
+                                        Any other approaches?
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Message -->
+                    <div id="error-message" class="mt-4 sm:mt-6 hidden">
+                        <div class="bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-400 p-4 sm:p-6 rounded-xl shadow-md">
+                            <div class="flex items-center">
+                                <i class="fas fa-exclamation-triangle text-red-500 mr-2 sm:mr-3 text-lg sm:text-xl"></i>
+                                <p class="text-red-700 font-medium text-base sm:text-lg" id="error-text"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

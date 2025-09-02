@@ -16,28 +16,28 @@
                     },
                     colors: {
                         primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
                         },
                         accent: {
-                            50: '#fdf4ff',
-                            100: '#fae8ff',
-                            200: '#f5d0fe',
-                            300: '#f0abfc',
-                            400: '#e879f9',
-                            500: '#d946ef',
-                            600: '#c026d3',
-                            700: '#a21caf',
-                            800: '#86198f',
-                            900: '#701a75',
+                            50: '#fdf2f8',
+                            100: '#fce7f3',
+                            200: '#fbcfe8',
+                            300: '#f9a8d4',
+                            400: '#f472b6',
+                            500: '#ec4899',
+                            600: '#db2777',
+                            700: '#be185d',
+                            800: '#9d174d',
+                            900: '#831843',
                         }
                     },
                     animation: {
@@ -68,9 +68,10 @@
             50% { transform: translateY(-10px); }
         }
         .glass-effect {
-            background: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
         .gradient-text {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -109,36 +110,39 @@
         }
     </style>
 </head>
-<body class="font-inter bg-gradient-to-br from-primary-50 via-white to-accent-50 min-h-screen">
+<body class="font-inter min-h-screen">
+    <div class="fixed inset-0 bg-gradient-to-br from-slate-100 via-gray-50 to-blue-50 -z-10"></div>
     <!-- Hero Section -->
     <div class="relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-r from-primary-600/10 to-accent-600/10 transform -skew-y-1 origin-top-left"></div>
-        <div class="relative container mx-auto px-6 py-16 max-w-6xl">
-            <div class="text-center mb-16 animate-fade-in">
-                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full mb-6 animate-float">
-                    <i class="fas fa-heart text-white text-2xl"></i>
+        <div class="relative container mx-auto px-6 py-4 max-w-6xl">
+        <!-- Hero Section -->
+        <div class="text-center py-4 px-6">
+            <div class="mb-4">
+                <div class="flex items-center justify-center mb-2">
+                    <div class="floating-heart w-8 h-8 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center animate-float mr-3">
+                        <i class="fas fa-heart text-white text-sm"></i>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-accent-700 bg-clip-text text-transparent animate-fade-in">
+                        ParentPulse
+                    </h1>
                 </div>
-                <h1 class="text-6xl font-bold gradient-text mb-4">
-                    ParentPulse
-                </h1>
-                <p class="text-xl text-gray-600 mb-6 max-w-2xl mx-auto leading-relaxed">
-                    Your AI-powered parenting companion. Get instant, personalized guidance for any parenting challenge.
+                <p class="text-base md:text-lg text-gray-700 font-medium animate-fade-in mb-2" style="animation-delay: 0.2s;">
+                    Your AI-powered parenting companion
                 </p>
-                <div class="flex flex-wrap justify-center gap-3 mb-8">
-                    <span class="glass-effect px-4 py-2 rounded-full text-sm font-medium text-primary-700">
-                        <i class="fas fa-microphone mr-2"></i>Voice Recognition
-                    </span>
+                <div class="flex justify-center space-x-3">
                     <span class="glass-effect px-4 py-2 rounded-full text-sm font-medium text-accent-700">
                         <i class="fas fa-brain mr-2"></i>AI-Powered
                     </span>
                     <span class="glass-effect px-4 py-2 rounded-full text-sm font-medium text-green-700">
-                        <i class="fas fa-leaf mr-2"></i>Lightweight
+                        <i class="fas fa-graduation-cap mr-2"></i>Expert Advice
                     </span>
+                </div>
                 </div>
             </div>
 
             <!-- Child Profile Section -->
-            <div class="glass-effect rounded-3xl p-8 mb-8 animate-slide-up">
+            <div class="bg-white rounded-3xl p-6 mb-6 shadow-xl border border-gray-200 animate-slide-up">
                 <div class="flex items-center mb-6">
                     <div class="w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl flex items-center justify-center mr-4">
                         <i class="fas fa-child text-white text-xl"></i>
@@ -152,10 +156,10 @@
                         <div class="bg-white rounded-xl p-4 border border-gray-100">
                             <div class="flex items-center justify-between mb-2">
                                 <span class="text-sm text-gray-500">1 year</span>
-                                <span id="age-display" class="text-2xl font-bold text-primary-600">5</span>
+                                <span id="age-display" class="text-2xl font-bold text-primary-600">10</span>
                                 <span class="text-sm text-gray-500">18 years</span>
                             </div>
-                            <input type="range" id="child-age" min="1" max="18" value="5" 
+                            <input type="range" id="child-age" min="1" max="18" value="10" 
                                    class="w-full h-2 bg-primary-100 rounded-lg appearance-none cursor-pointer slider">
                         </div>
                     </div>
@@ -178,8 +182,8 @@
                 </div>
             </div>
 
-            <!-- Input Mode Selection -->
-            <div class="glass-effect rounded-3xl p-8 mb-8 animate-slide-up">
+            <!-- Input Method Section -->
+            <div class="bg-white rounded-3xl p-6 mb-6 shadow-xl border border-gray-200 animate-slide-up">
                 <div class="flex items-center mb-6">
                     <div class="w-12 h-12 bg-gradient-to-r from-accent-500 to-accent-600 rounded-xl flex items-center justify-center mr-4">
                         <i class="fas fa-comments text-white text-xl"></i>
@@ -190,9 +194,9 @@
                 <div class="grid md:grid-cols-2 gap-4 mb-6">
                     <label class="relative cursor-pointer group">
                         <input type="radio" name="input-mode" value="text" checked class="sr-only">
-                        <div class="input-mode-card bg-white border-2 border-primary-200 rounded-2xl p-6 transition-all duration-200 group-hover:border-primary-400 group-hover:shadow-lg">
-                            <div class="icon-bg flex items-center justify-center w-12 h-12 bg-primary-100 rounded-xl mb-4 mx-auto group-hover:bg-primary-200 transition-colors">
-                                <i class="fas fa-keyboard text-primary-600 text-xl"></i>
+                        <div class="input-mode-card bg-white border-2 border-primary-300 rounded-2xl p-6 transition-all duration-200 group-hover:border-primary-500 group-hover:shadow-xl shadow-md">
+                            <div class="icon-bg flex items-center justify-center w-12 h-12 bg-primary-200 rounded-xl mb-4 mx-auto group-hover:bg-primary-300 transition-colors">
+                                <i class="fas fa-keyboard text-primary-700 text-xl"></i>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-800 text-center mb-2">Type Your Message</h3>
                             <p class="text-sm text-gray-600 text-center">Write out your parenting situation or question</p>
@@ -201,9 +205,9 @@
                     
                     <label class="relative cursor-pointer group">
                         <input type="radio" name="input-mode" value="voice" class="sr-only">
-                        <div class="input-mode-card bg-white border-2 border-accent-200 rounded-2xl p-6 transition-all duration-200 group-hover:border-accent-400 group-hover:shadow-lg">
-                            <div class="icon-bg flex items-center justify-center w-12 h-12 bg-accent-100 rounded-xl mb-4 mx-auto group-hover:bg-accent-200 transition-colors">
-                                <i class="fas fa-microphone text-accent-600 text-xl"></i>
+                        <div class="input-mode-card bg-white border-2 border-accent-300 rounded-2xl p-6 transition-all duration-200 group-hover:border-accent-500 group-hover:shadow-xl shadow-md">
+                            <div class="icon-bg flex items-center justify-center w-12 h-12 bg-accent-200 rounded-xl mb-4 mx-auto group-hover:bg-accent-300 transition-colors">
+                                <i class="fas fa-microphone text-accent-700 text-xl"></i>
                             </div>
                             <h3 class="text-lg font-semibold text-gray-800 text-center mb-2">Speak Naturally</h3>
                             <p class="text-sm text-gray-600 text-center">Use voice recognition to share your thoughts</p>
@@ -213,16 +217,17 @@
 
                 <!-- Text Input Section -->
                 <div id="text-input-section" class="space-y-4">
-                    <div class="bg-white rounded-2xl p-6 border border-gray-100">
-                        <label for="user-text" class="block text-sm font-semibold text-gray-700 mb-3">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-300 shadow-lg">
+                        <label for="user-text" class="block text-sm font-semibold text-gray-800 mb-3">
                             What's on your mind as a parent today?
                         </label>
-                        <textarea id="user-text" rows="5" 
-                                  placeholder="Share what's happening with your child... Maybe they're having tantrums, not listening, or you're unsure how to handle a specific behavior. I'm here to help! 💙"
-                                  class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none transition-all duration-200 text-gray-700"></textarea>
+                        <textarea id="user-text" 
+                                  placeholder="Share your parenting situation, challenge, or question. For example: 'My 5-year-old won't listen when I ask them to clean up their toys...'" 
+                                  class="w-full h-32 p-4 border border-gray-300 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent transition-all duration-200 text-gray-800"
+                                  maxlength="1000"></textarea>
                         <div class="flex justify-between items-center mt-3">
-                            <p class="text-xs text-gray-500">Press Ctrl+Enter to submit</p>
-                            <div class="flex items-center text-xs text-gray-400">
+                            <span id="char-count" class="text-xs text-gray-500">0/1000 characters</span>
+                            <div class="flex items-center text-xs text-gray-500">
                                 <i class="fas fa-lock mr-1"></i>
                                 <span>Your conversation is private</span>
                             </div>
@@ -232,7 +237,7 @@
 
                 <!-- Voice Input Section -->
                 <div id="voice-input-section" class="space-y-6 hidden">
-                    <div class="bg-white rounded-2xl p-8 border border-gray-100 text-center">
+                    <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-200 animate-fade-in text-center">
                         <div class="mb-6">
                             <button id="record-btn" 
                                     class="relative bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-bold py-4 px-8 rounded-full transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
@@ -260,14 +265,13 @@
                 <!-- Submit Button -->
                 <div class="text-center mt-8">
                     <button id="submit-btn" 
-                            class="bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 text-white font-bold py-4 px-12 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
+                            class="bg-gradient-to-r from-primary-700 to-primary-800 hover:from-primary-800 hover:to-primary-900 text-white font-bold py-4 px-12 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
                         <span id="submit-spinner" class="hidden">
                             <i class="fas fa-spinner fa-spin mr-3"></i>
                         </span>
                         <i class="fas fa-heart mr-3"></i>
                         <span id="submit-text" class="text-lg">Get Parenting Guidance</span>
                     </button>
-                    <p class="text-sm text-gray-500 mt-3">Powered by AI • Responses in seconds</p>
                 </div>
             </div>
         </div>
@@ -321,7 +325,7 @@
             </div>
 
             <!-- AI Advice -->
-            <div id="advice-result" class="hidden glass-effect rounded-2xl p-6 animate-slide-up">
+            <div id="advice-section" class="hidden bg-white rounded-2xl p-6 mb-8 shadow-xl border border-gray-200 animate-slide-up">
                 <div class="flex items-center mb-4">
                     <div class="w-10 h-10 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center mr-3">
                         <i class="fas fa-lightbulb text-white"></i>
@@ -332,16 +336,16 @@
             </div>
 
             <!-- Follow-up Section -->
-            <div id="followup-section" class="hidden glass-effect rounded-2xl p-6 animate-slide-up">
+            <div id="followup-section" class="hidden bg-white rounded-2xl p-6 shadow-xl border border-gray-200 animate-slide-up">
                 <div class="flex items-center mb-6">
-                    <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl flex items-center justify-center mr-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mr-3">
                         <i class="fas fa-comments text-white"></i>
                     </div>
                     <h3 class="text-lg font-semibold text-gray-800">Continue the Conversation</h3>
                 </div>
                 
                 <!-- Conversation History -->
-                <div id="conversation-history" class="max-h-64 overflow-y-auto space-y-4 mb-6 p-4 bg-white rounded-xl border border-gray-100"></div>
+                <div id="conversation-history" class="max-h-64 overflow-y-auto space-y-4 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-inner"></div>
                 
                 <!-- Quick Follow-up Buttons -->
                 <div class="flex flex-wrap gap-3 mb-6">
@@ -373,20 +377,15 @@
         </div>
 
         <!-- Footer -->
-        <div class="text-center py-12 text-gray-500">
+        <div class="bg-white/80 backdrop-blur-sm border-t border-gray-200 text-center py-8 text-gray-500 mt-12">
             <div class="max-w-md mx-auto">
                 <div class="flex justify-center items-center mb-4">
-                    <div class="w-8 h-8 bg-gradient-to-r from-primary-500 to-accent-500 rounded-full flex items-center justify-center mr-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-primary-600 to-accent-600 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-heart text-white text-sm"></i>
                     </div>
                     <span class="font-semibold text-gray-600">ParentPulse</span>
                 </div>
-                <p class="text-sm mb-2">Modern Node.js Backend | Powered by Google Gemini & Web Speech API</p>
                 <div class="flex justify-center items-center space-x-4 text-xs">
-                    <span class="flex items-center">
-                        <i class="fas fa-code mr-1"></i>
-                        4 dependencies only
-                    </span>
                     <span class="flex items-center">
                         <i class="fas fa-shield-alt mr-1"></i>
                         Privacy-focused

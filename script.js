@@ -6,15 +6,10 @@ const tonePref = document.getElementById('tone-pref');
 const inputModeRadios = document.querySelectorAll('input[name="input-mode"]');
 const textInputSection = document.getElementById('text-input-section');
 const voiceInputSection = document.getElementById('voice-input-section');
-const audioInputSection = document.getElementById('audio-input-section');
 const userText = document.getElementById('user-text');
 const recordBtn = document.getElementById('record-btn');
 const recordText = document.getElementById('record-text');
-const recordingStatus = document.getElementById('recording-status');
-const recordingTime = document.getElementById('recording-time');
 const voiceStatus = document.getElementById('voice-status');
-const audioFile = document.getElementById('audio-file');
-const audioStatus = document.getElementById('audio-status');
 const submitBtn = document.getElementById('submit-btn');
 const submitText = document.getElementById('submit-text');
 const submitSpinner = document.getElementById('submit-spinner');
@@ -43,17 +38,14 @@ const API_BASE = 'http://localhost:5000/api';
 let currentTranscription = '';
 let isProcessing = false;
 let conversationMessages = [];
-let initialUserInput = '';
 let childProfile = {};
-let mediaRecorder = null;
-let audioChunks = [];
-let isRecording = false;
-let recordingStartTime = 0;
-let recordingTimer = null;
+let recognition = null;
+let isListening = false;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
+    setupSpeechRecognition();
     updateInputMode();
 });
 
@@ -68,11 +60,8 @@ function setupEventListeners() {
         radio.addEventListener('change', updateInputMode);
     });
 
-    // Audio file upload
-    audioFile.addEventListener('change', handleAudioUpload);
-
     // Voice recording button
-    recordBtn.addEventListener('click', toggleRecording);
+    recordBtn.addEventListener('click', toggleSpeechRecognition);
 
     // Submit button
     submitBtn.addEventListener('click', handleSubmit);
@@ -102,137 +91,102 @@ function setupEventListeners() {
     });
 }
 
+function setupSpeechRecognition() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = function() {
+            isListening = true;
+            recordBtn.classList.remove('bg-gradient-to-r', 'from-red-500', 'to-red-600', 'hover:from-red-600', 'hover:to-red-700');
+            recordBtn.classList.add('listening-animation');
+            recordText.textContent = 'Stop Listening';
+            showVoiceStatus('🎤 Listening... Speak now', 'info');
+        };
+
+        recognition.onresult = function(event) {
+            let finalTranscript = '';
+            let interimTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript;
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            if (finalTranscript) {
+                currentTranscription = finalTranscript.trim();
+                showVoiceStatus(`✅ Transcribed: "${currentTranscription}"`, 'success');
+                showTranscription(currentTranscription);
+            } else if (interimTranscript) {
+                showVoiceStatus(`Listening: "${interimTranscript}"`, 'info');
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            showVoiceStatus(`Error: ${event.error}. Please try again.`, 'error');
+            resetRecordingUI();
+        };
+
+        recognition.onend = function() {
+            resetRecordingUI();
+        };
+    } else {
+        showVoiceStatus('Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.', 'error');
+        recordBtn.disabled = true;
+    }
+}
+
 function updateInputMode() {
     const selectedMode = document.querySelector('input[name="input-mode"]:checked').value;
     
+    // Update card styles
+    document.querySelectorAll('.input-mode-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    
+    const selectedCard = document.querySelector(`input[value="${selectedMode}"]`).closest('label').querySelector('.input-mode-card');
+    selectedCard.classList.add('selected');
+    
     textInputSection.classList.add('hidden');
     voiceInputSection.classList.add('hidden');
-    audioInputSection.classList.add('hidden');
     
     if (selectedMode === 'text') {
         textInputSection.classList.remove('hidden');
     } else if (selectedMode === 'voice') {
         voiceInputSection.classList.remove('hidden');
-    } else if (selectedMode === 'audio') {
-        audioInputSection.classList.remove('hidden');
     }
     
     currentTranscription = '';
     hideResults();
 }
 
-// Voice Recording Functions
-async function toggleRecording() {
-    if (isRecording) {
-        stopRecording();
+function toggleSpeechRecognition() {
+    if (!recognition) {
+        showVoiceStatus('Speech recognition not available', 'error');
+        return;
+    }
+
+    if (isListening) {
+        recognition.stop();
     } else {
-        await startRecording();
+        recognition.start();
     }
 }
 
-async function startRecording() {
-    try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        
-        mediaRecorder.ondataavailable = (event) => {
-            audioChunks.push(event.data);
-        };
-        
-        mediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-            await transcribeVoiceRecording(audioBlob);
-            
-            // Stop all tracks to release microphone
-            stream.getTracks().forEach(track => track.stop());
-        };
-        
-        mediaRecorder.start();
-        isRecording = true;
-        recordingStartTime = Date.now();
-        
-        // Update UI
-        recordBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
-        recordBtn.classList.add('bg-gray-500', 'hover:bg-gray-600');
-        recordText.textContent = 'Stop Recording';
-        recordingStatus.classList.remove('hidden');
-        
-        // Start timer
-        recordingTimer = setInterval(updateRecordingTime, 100);
-        
-        showVoiceStatus('Recording started...', 'info');
-        
-    } catch (error) {
-        console.error('Error accessing microphone:', error);
-        showVoiceStatus('Error: Could not access microphone. Please check permissions.', 'error');
-    }
-}
-
-function stopRecording() {
-    if (mediaRecorder && isRecording) {
-        mediaRecorder.stop();
-        isRecording = false;
-        
-        // Update UI
-        recordBtn.classList.remove('bg-gray-500', 'hover:bg-gray-600');
-        recordBtn.classList.add('bg-red-500', 'hover:bg-red-600');
-        recordText.textContent = 'Start Recording';
-        recordingStatus.classList.add('hidden');
-        
-        // Clear timer
-        if (recordingTimer) {
-            clearInterval(recordingTimer);
-            recordingTimer = null;
-        }
-        
-        showVoiceStatus('Processing recording...', 'info');
-    }
-}
-
-function updateRecordingTime() {
-    if (isRecording) {
-        const elapsed = Date.now() - recordingStartTime;
-        const seconds = Math.floor(elapsed / 1000);
-        const minutes = Math.floor(seconds / 60);
-        const remainingSeconds = seconds % 60;
-        recordingTime.textContent = `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-    }
-}
-
-async function transcribeVoiceRecording(audioBlob) {
-    try {
-        const formData = new FormData();
-        formData.append('audio', audioBlob, 'recording.wav');
-        
-        const response = await fetch(`${API_BASE}/transcribe`, {
-            method: 'POST',
-            body: formData
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.transcription && data.transcription.trim()) {
-            currentTranscription = data.transcription.trim();
-            showVoiceStatus(`✅ Transcribed: "${currentTranscription}"`, 'success');
-            
-            // Show transcription result
-            transcriptionText.textContent = currentTranscription;
-            transcriptionResult.classList.remove('hidden');
-            results.classList.remove('hidden');
-        } else {
-            showVoiceStatus('No speech detected. Please try recording again.', 'warning');
-        }
-        
-    } catch (error) {
-        console.error('Transcription error:', error);
-        showVoiceStatus('Error transcribing audio. Please try again.', 'error');
-    }
+function resetRecordingUI() {
+    isListening = false;
+    recordBtn.classList.remove('listening-animation');
+    recordBtn.classList.add('bg-gradient-to-r', 'from-red-500', 'to-red-600', 'hover:from-red-600', 'hover:to-red-700');
+    recordText.textContent = 'Start Listening';
 }
 
 function showVoiceStatus(message, type) {
@@ -250,74 +204,6 @@ function showVoiceStatus(message, type) {
     }
     
     voiceStatus.classList.remove('hidden');
-}
-
-function handleAudioUpload() {
-    const file = audioFile.files[0];
-    if (!file) return;
-
-    // Validate file type
-    const allowedTypes = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/mpeg'];
-    if (!allowedTypes.includes(file.type) && !file.name.match(/\.(mp3|wav|m4a)$/i)) {
-        showError('Please upload a valid audio file (MP3, WAV, or M4A)');
-        return;
-    }
-
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-        showError('File size must be less than 10MB');
-        return;
-    }
-
-    showAudioStatus('Audio file selected: ' + file.name, 'success');
-    transcribeAudio(file);
-}
-
-async function transcribeAudio(file) {
-    showAudioStatus('Transcribing audio...', 'loading');
-    
-    const formData = new FormData();
-    formData.append('audio', file);
-
-    try {
-        const response = await fetch(`${API_BASE}/transcribe`, {
-            method: 'POST',
-            body: formData
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.error || 'Transcription failed');
-        }
-
-        currentTranscription = data.transcription;
-        showAudioStatus('✅ Transcription complete!', 'success');
-        showTranscription(currentTranscription);
-
-    } catch (error) {
-        showError('Transcription failed: ' + error.message);
-        showAudioStatus('Transcription failed', 'error');
-    }
-}
-
-function showAudioStatus(message, type) {
-    audioStatus.classList.remove('hidden');
-    audioStatus.className = 'mt-2 p-2 rounded text-sm';
-    
-    switch (type) {
-        case 'loading':
-            audioStatus.classList.add('bg-blue-100', 'text-blue-700');
-            break;
-        case 'success':
-            audioStatus.classList.add('bg-green-100', 'text-green-700');
-            break;
-        case 'error':
-            audioStatus.classList.add('bg-red-100', 'text-red-700');
-            break;
-    }
-    
-    audioStatus.textContent = message;
 }
 
 function showTranscription(text) {
@@ -338,13 +224,9 @@ async function handleSubmit() {
             showError('Please enter some text describing your situation');
             return;
         }
-    } else if (selectedMode === 'voice' || selectedMode === 'audio') {
+    } else if (selectedMode === 'voice') {
         if (!currentTranscription) {
-            if (selectedMode === 'voice') {
-                showError('Please record your voice first');
-            } else {
-                showError('Please upload and transcribe an audio file first');
-            }
+            showError('Please use voice recognition to capture your question first');
             return;
         }
         inputText = currentTranscription;
@@ -359,7 +241,6 @@ async function analyzeInput(text) {
 
     // Store initial input and child profile for follow-ups
     if (conversationMessages.length === 0) {
-        initialUserInput = text;
         childProfile = {
             age: parseInt(ageSlider.value),
             traits: childTraits.value.trim() || 'Sensitive, high energy'

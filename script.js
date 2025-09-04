@@ -69,12 +69,13 @@ function setupEventListeners() {
     // Follow-up button
     followupBtn.addEventListener('click', handleFollowup);
 
-    // Quick follow-up buttons
-    quickFollowupBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            followupText.value = this.textContent;
+    // Quick follow-up buttons (will be dynamically created)
+    // Event delegation for dynamic buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('quick-followup-btn')) {
+            followupText.value = e.target.textContent;
             handleFollowup();
-        });
+        }
     });
 
     // Enter key in text areas
@@ -299,6 +300,9 @@ function showResults(data, userQuestion) {
     // Update conversation history display
     updateConversationHistory();
 
+    // Generate dynamic follow-up questions
+    generateDynamicFollowupQuestions(data.advice, userQuestion);
+
     // Show follow-up section
     followupSection.classList.remove('hidden');
 
@@ -390,6 +394,102 @@ function setFollowupLoading(loading) {
     }
 }
 
+function generateDynamicFollowupQuestions(advice, userQuestion) {
+    const followupContainer = document.getElementById('quick-followup-buttons');
+    followupContainer.innerHTML = '';
+    
+    // Analyze the advice content to generate relevant follow-up questions
+    const adviceLower = advice.toLowerCase();
+    const questionLower = userQuestion.toLowerCase();
+    
+    let followupQuestions = [];
+    
+    // Default questions that work for most scenarios
+    const defaultQuestions = [
+        "What if that doesn't work?",
+        "Can you give me another approach?",
+        "How do I stay consistent?"
+    ];
+    
+    // Context-specific questions based on advice content
+    if (adviceLower.includes('say') || adviceLower.includes('tell') || adviceLower.includes('phrase')) {
+        followupQuestions.push("What if they don't respond well to those words?");
+        followupQuestions.push("How should I adjust my tone?");
+    }
+    
+    if (adviceLower.includes('routine') || adviceLower.includes('schedule') || adviceLower.includes('consistent')) {
+        followupQuestions.push("How long before I see results?");
+        followupQuestions.push("What if we miss a day?");
+    }
+    
+    if (adviceLower.includes('timeout') || adviceLower.includes('consequence') || adviceLower.includes('discipline')) {
+        followupQuestions.push("How do I handle resistance?");
+        followupQuestions.push("What if they escalate?");
+    }
+    
+    if (adviceLower.includes('calm') || adviceLower.includes('breathe') || adviceLower.includes('patience')) {
+        followupQuestions.push("What if I lose my temper?");
+        followupQuestions.push("How do I reset after a bad moment?");
+    }
+    
+    if (adviceLower.includes('explain') || adviceLower.includes('talk') || adviceLower.includes('discuss')) {
+        followupQuestions.push("What if they're too young to understand?");
+        followupQuestions.push("How do I simplify this for them?");
+    }
+    
+    if (adviceLower.includes('bedtime') || adviceLower.includes('sleep') || adviceLower.includes('nap')) {
+        followupQuestions.push("What about weekend schedules?");
+        followupQuestions.push("How do I handle sleep regression?");
+    }
+    
+    if (adviceLower.includes('tantrum') || adviceLower.includes('meltdown') || adviceLower.includes('crying')) {
+        followupQuestions.push("What if it happens in public?");
+        followupQuestions.push("How long should I wait it out?");
+    }
+    
+    // Age-specific questions
+    const childAge = parseInt(ageSlider.value);
+    if (childAge <= 3) {
+        followupQuestions.push("Is this normal for their age?");
+    } else if (childAge >= 4 && childAge <= 8) {
+        followupQuestions.push("How do I involve them in the solution?");
+    } else if (childAge >= 9) {
+        followupQuestions.push("Should I give them more independence?");
+    }
+    
+    // Emotion-based questions
+    if (questionLower.includes('frustrated') || questionLower.includes('angry')) {
+        followupQuestions.push("How do I manage my own emotions?");
+    }
+    
+    if (questionLower.includes('worried') || questionLower.includes('concerned')) {
+        followupQuestions.push("When should I be concerned?");
+    }
+    
+    // Remove duplicates and limit to 3-4 questions
+    followupQuestions = [...new Set(followupQuestions)];
+    
+    // If we don't have enough specific questions, add defaults
+    if (followupQuestions.length < 3) {
+        defaultQuestions.forEach(q => {
+            if (!followupQuestions.includes(q) && followupQuestions.length < 4) {
+                followupQuestions.push(q);
+            }
+        });
+    }
+    
+    // Limit to 4 questions max
+    followupQuestions = followupQuestions.slice(0, 4);
+    
+    // Create buttons
+    followupQuestions.forEach(question => {
+        const button = document.createElement('button');
+        button.className = 'quick-followup-btn bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 px-4 py-2 rounded-full text-sm transition-all duration-200 hover:shadow-md transform hover:scale-105';
+        button.textContent = question;
+        followupContainer.appendChild(button);
+    });
+}
+
 function hideResults() {
     results.classList.add('hidden');
     transcriptionResult.classList.add('hidden');
@@ -398,4 +498,5 @@ function hideResults() {
     followupSection.classList.add('hidden');
     conversationMessages = [];
     conversationHistory.innerHTML = '';
+    document.getElementById('quick-followup-buttons').innerHTML = '';
 }
